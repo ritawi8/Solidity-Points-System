@@ -49,4 +49,46 @@ describe("PointsSystem", function(){
             expect(memberData[1]).to.equal(200); // points = 200
         })
     })
+
+    describe("Transfer Points", function(){
+        it("Should allow member to tranfer points to another member", async function(){
+            const { pointsSystem, member, admin } = await deployPointsSystemFixture();
+
+            //Steg 1: Registrerar båda som medlemmar (admin agerar som medlem här)
+            await pointsSystem.connect(member).registerMember("Member1");
+            await pointsSystem.connect(admin).registerMember("Member2");
+            
+            //Steg 2: Ge Member1 några poäng att överföra
+            await pointsSystem.connect(member).earnPoints(100); // Member1 får 100 poäng
+
+            //Steg 3: Member1 överför 50 poäng till Member2
+            await pointsSystem.connect(member).transferPoints(admin.address, 50);
+
+            //Steg 4: Hämta båda medlemmarnas data för verifiering
+            const member1Data = await pointsSystem.members(member.address);
+            const member2Data = await pointsSystem.members(admin.address);
+
+            //Steg 5: Verifiera att överföringen fungerar korrekt
+            expect(member1Data[1]).to.equal(50);
+            expect(member2Data[1]).to.equal(50);
+
+        })
+    })
+
+    describe("Redeem Reward", function (){
+        it("Should allow member to redeem points for reward", async function(){
+            const { pointsSystem, member } = await deployPointsSystemFixture();
+
+            //Registrera medlem och ge poäng
+            await pointsSystem.connect(member).registerMember("TestUser");
+            await pointsSystem.connect(member).earnPoints(500);
+
+            //Lösa in VIP-status 
+            await pointsSystem.connect(member).redeemReward(1);
+
+            //Kontrollera att poängen drogs av
+            const memberData = await pointsSystem.members(member.address);
+            expect(memberData[1]).to.equal(0);
+        })
+    })
 })
