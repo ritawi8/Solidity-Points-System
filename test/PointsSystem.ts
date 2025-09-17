@@ -31,4 +31,22 @@ describe("PointsSystem", function(){
             expect(memberData[2]).to.be.true;
         })
     })
+
+    describe("Assign Points", function (){
+        it("Should allow admin to assign points to member", async function(){
+            const { pointsSystem, owner, admin, member } = await deployPointsSystemFixture();
+
+            //Först: gör admin till faktisk admin
+            await pointsSystem.connect(owner).assignAdmin(admin.address);
+
+            //Sen:  registrera medlem
+            await pointsSystem.connect(member).registerMember("TestUser");
+
+            //Nu: admin kan ge poäng
+            await pointsSystem.connect(admin).assignPoints(member.address, 200);
+
+            const memberData = await pointsSystem.members(member.address);
+            expect(memberData[1]).to.equal(200); // points = 200
+        })
+    })
 })
