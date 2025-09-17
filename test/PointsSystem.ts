@@ -19,4 +19,16 @@ describe("PointsSystem", function(){
             expect(await pointsSystem.admins(owner.address)).to.be.true;
         })
     })
+
+    describe("Member Registration", function (){
+        it("Should allow member registration", async function(){
+            const { pointsSystem, member } = await deployPointsSystemFixture();
+
+            await pointsSystem.connect(member).registerMember("TestUser");
+
+            //Kontrollera att medlemmen är registrerad
+            const memberData = await pointsSystem.members(member.address);
+            expect(memberData[2]).to.be.true;
+        })
+    })
 })
